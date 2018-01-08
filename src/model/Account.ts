@@ -1,7 +1,6 @@
 import { observable, action, computed } from 'mobx';
 
-export class Account {
-
+export class Account {   
     @observable
     account: string = '';
 
@@ -35,5 +34,4 @@ export class Account {
     setAccount(value: string){
         this.account = value;
     }
-
 }

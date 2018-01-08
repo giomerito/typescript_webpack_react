@@ -2,8 +2,9 @@ import * as React from 'react';
 import { Transacao } from '../model/Transacao';
 import { observer } from 'mobx-react';
 import { Account } from '../model/Account';
+import { addEventListener } from 'history/DOMUtils';
 
-export interface TrasacaoViewProps{
+export interface TrasacaoViewProps {
     transaction: Transacao;
     //account: Account;       
 }
@@ -11,13 +12,15 @@ export interface TrasacaoViewProps{
 /* funções */
 
 function handleOnChange(
-    property: keyof Transacao, 
-    handler: (value: string) => void){
+    property: keyof Transacao,
+    handler: (value: string) => void) {
 
-        return (e: React.FormEvent<HTMLInputElement>) => {
-            handler(e.currentTarget.value);
-        }
+    return (e: React.FormEvent<HTMLInputElement>) => {
+        handler(e.currentTarget.value);
+    }
 }
+
+
 
 /* fim de funções */
 
@@ -48,93 +51,109 @@ export class TransacaoView extends React.Component<TrasacaoViewProps>{
         'data',
         value => this.props.transaction.setData(new Date(value))
     );
-   
+
     readonly onSubmit = () => {
 
-        var { id, data, conta, operacao, valor } = this.props.transaction;
-       
-        var acc = localStorage.getItem(conta);     
         
+        var { id, data, conta, operacao, valor } = this.props.transaction;
 
-        if(acc == ''){
+        var acc = localStorage.getItem('accounts');
+        
+        if (acc == '') {
             alert('A conta informada não existe!');
-        }else if(operacao == '' && valor == 0){
+        } else if (operacao == '' && valor == 0) {
             alert('É preciso preencher os \nvalores necessários para procequir com a operação!');
-        }else{            
-            localStorage.setItem(id, JSON.stringify({id, data, conta, operacao, valor}));
-            alert( `${ operacao }` + ' realizado com sucesso!');
+        } else {
+            localStorage.setItem('operacoes', JSON.stringify({conta, data, operacao, valor }));
+            alert(`${operacao}` + ' realizado com sucesso!');
         }
+        
 
     }
 
+
     render() {
         const { transaction } = this.props;
-        
-        
-        return(
-            <div>
-                <form onSubmit={this.onSubmit}>
-                    <h2>Operações</h2>
-                    <TextInput 
-                        label='Id'
-                        value={transaction.id}
-                        onChange={this.setId}
-                    />  
 
-                    
-                    <TextInput 
+
+        return (
+            <div>
+                <form onSubmit={this.onSubmit} id="add-form">
+                    <h2>Operações</h2>
+                    <TextInput
                         label='Conta'
                         value={transaction.conta}
                         onChange={this.setConta}
-                    /> 
-
-                    <TextInput 
-                        label='Operação'
-                        value={transaction.operacao}
-                        onChange={this.setOperacao}
                     />
 
-                    <NumberInput 
+                    <DateInput
+                        label="Data"
+                        value={transaction.data}
+                        onChange={this.setData}
+                    />
+                    
+                    <label>Operação:</label>
+                    <select className="form-control" value={transaction.operacao}>
+                        <option>Credito</option>
+                        <option>Debito</option>
+                    </select><br />
+
+
+                    <NumberInput
                         label='Valor'
                         value={transaction.valor}
                         onChange={this.setValor}
-                    />   
+                    />
 
-                    <input type="submit" value="Cadastrar"/>
+                    <button type="submit">Cadastrar</button>
 
                 </form>
+                <br />
+                <div>
+                    <table id="list-table">
+                        <thead>
+                            <th>Conta</th>
+                            <th>Data</th>                            
+                            <th>Operação</th>
+                            <th>Saldo</th>
+                            <th>Opções</th>
+                        </thead>
+                    </table>
+                </div>
+
             </div>
         );
     }
 
 }//Fim da classe de Trasações
 
-interface TextInputProps{
+interface TextInputProps {
     label: string;
     value: string;
     onChange: React.EventHandler<React.FormEvent<HTMLInputElement>>;
 }
 
-interface NumberInputProps{
+interface NumberInputProps {
     label: string;
     value: number;
     onChange: React.EventHandler<React.FormEvent<HTMLInputElement>>;
 }
 
-interface DateInputProps{
+interface DateInputProps {
     label: string;
     value: Date;
     onChange: React.EventHandler<React.FormEvent<HTMLDataElement>>;
 }
 
-function TextInput(props: TextInputProps){
-    const{
+
+function TextInput(props: TextInputProps) {
+    const {
         label,
         value,
         onChange
     } = props;
 
-    return(
+    return (
         <div className='form-group'>
             <label>{label}:</label>
             <input type='text' className='form-control' value={value} onChange={onChange} />
@@ -142,14 +161,14 @@ function TextInput(props: TextInputProps){
     );
 }
 
-function DateInput(props: DateInputProps){
-    const{
+function DateInput(props: DateInputProps) {
+    const {
         label,
         value,
         onChange
     } = props;
 
-    return(
+    return (
         <div className='form-group'>
             <label>{label}:</label>
             <input type='date' className='form-control' value={Date.apply(value)} onChange={onChange} />
@@ -157,14 +176,14 @@ function DateInput(props: DateInputProps){
     );
 }
 
-function NumberInput(props: NumberInputProps){
-    const{
+function NumberInput(props: NumberInputProps) {
+    const {
         label,
         value,
         onChange
     } = props;
 
-    return(
+    return (
         <div className='form-group'>
             <label>{label}:</label>
             <input type='number' className='form-control' value={value} onChange={onChange} />
